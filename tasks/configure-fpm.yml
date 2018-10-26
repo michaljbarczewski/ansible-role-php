@@ -48,7 +48,7 @@
     dest: "{{ php_fpm_pool_conf_path }}"
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
-    state: present
+    state: "{{ item.state | default('present') }}"
   with_items:
     - regexp: "^user.?=.+$"
       line: "user = {{ php_fpm_pool_user }}"
@@ -72,6 +72,9 @@
       line: "pm.min_spare_servers = {{ php_fpm_pm_min_spare_servers }}"
     - regexp: '^pm\.max_spare_servers.?=.+$'
       line: "pm.max_spare_servers = {{ php_fpm_pm_max_spare_servers }}"
+    - regexp: '^;?pm\.status_path.?=.+$'
+      line: "pm.status_path = {{ php_fpm_pm_status_path | default('/status') }}"
+      state: "{{ 'present' if php_fpm_pm_status_path is defined else 'absent' }}"
   when: php_enable_php_fpm
   notify: restart php-fpm
 
